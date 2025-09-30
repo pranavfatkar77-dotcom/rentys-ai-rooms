@@ -51,10 +51,23 @@ export default function OwnerDashboard() {
 
   const fetchOwnerData = async () => {
     try {
+      // Get current user profile
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
       // Fetch owner's rooms
       const { data: roomsData, error: roomsError } = await supabase
         .from("rooms")
-        .select("*");
+        .select("*")
+        .eq("owner_id", profile.id);
 
       if (roomsError) throw roomsError;
       setRooms(roomsData || []);
@@ -66,7 +79,8 @@ export default function OwnerDashboard() {
           *,
           tenant:profiles!requests_tenant_id_fkey (name, email, phone),
           room:rooms!requests_room_id_fkey (address_line, city, rent)
-        `);
+        `)
+        .eq("owner_id", profile.id);
 
       if (requestsError) throw requestsError;
       setRequests(requestsData || []);

@@ -82,6 +82,7 @@ export default function RoomDetails() {
 
       if (!profile) throw new Error("Profile not found");
 
+      // Note: room_id should be stored as UUID, not int based on the current schema
       const { error } = await supabase
         .from("requests")
         .insert([

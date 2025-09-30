@@ -47,7 +47,10 @@ export default function TenantDashboard() {
     try {
       const { data, error } = await supabase
         .from("rooms")
-        .select("*")
+        .select(`
+          *,
+          owner:profiles!rooms_owner_id_fkey (name, phone)
+        `)
         .eq("is_active", true);
 
       if (error) throw error;
@@ -65,7 +68,10 @@ export default function TenantDashboard() {
     try {
       let query = supabase
         .from("rooms")
-        .select("*")
+        .select(`
+          *,
+          owner:profiles!rooms_owner_id_fkey (name, phone)
+        `)
         .eq("is_active", true)
         .lte("rent", budget[0]);
 

@@ -27,18 +27,31 @@ export default function AuthForm({ role }: AuthFormProps) {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         if (error) throw error;
         
-        navigate(role === "tenant" ? "/tenant" : "/owner");
+        // Check user's role from profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("user_id", data.user.id)
+          .single();
+        
+        if (profileError) {
+          throw new Error("Profile not found");
+        }
+        
+        // Navigate based on actual user role, not requested role
+        navigate(profile.role === "tenant" ? "/tenant" : "/owner");
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
+            emailRedirectTo: `${window.location.origin}/`,
             data: {
               name,
               phone,

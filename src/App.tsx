@@ -8,6 +8,7 @@ import TenantDashboard from "./pages/TenantDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import RoomDetails from "./pages/RoomDetails";
 import NotFound from "./pages/NotFound";
+import AuthGuard from "./components/auth/AuthGuard";
 
 const queryClient = new QueryClient();
 
@@ -19,9 +20,21 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Auth />} />
-          <Route path="/tenant" element={<TenantDashboard />} />
-          <Route path="/owner" element={<OwnerDashboard />} />
-          <Route path="/room/:roomId" element={<RoomDetails />} />
+          <Route path="/tenant" element={
+            <AuthGuard requiredRole="tenant">
+              <TenantDashboard />
+            </AuthGuard>
+          } />
+          <Route path="/owner" element={
+            <AuthGuard requiredRole="owner">
+              <OwnerDashboard />
+            </AuthGuard>
+          } />
+          <Route path="/room/:roomId" element={
+            <AuthGuard requiredRole="tenant">
+              <RoomDetails />
+            </AuthGuard>
+          } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
